@@ -49,6 +49,7 @@ string[] n_grams(string str){
 }
 
 string[] doubles(string[] strs){
+  if (strs.length < 2) return [];
   string[] ndoubles = [];
   for (int i; i < strs.length-1; i++){
     if (strs[i+1] != strs[i]) ndoubles ~= strs[i] ~ ' ' ~ strs[i+1];
@@ -57,6 +58,7 @@ string[] doubles(string[] strs){
 }
 
 string[] triples(string[] strs){
+  if (strs.length < 3) return [];
   string[] ntriples = [];
   for (int i; i < strs.length-2; i++){
     if (strs[i+1] != strs[i] && strs[i+1] != strs[i+2]) ntriples ~= strs[i] ~ ' ' ~ strs[i+1] ~ ' ' ~ strs[i+2];
