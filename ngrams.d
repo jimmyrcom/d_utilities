@@ -43,17 +43,16 @@ auto ranked_ngrams(string str){
 }
 
 bool check_if_junk(ref string x){
-  if (replace(x,ctRegex!(`s$`), "") in junk) return true;    // right -> rights
-  if (replace(x,ctRegex!(`ly$`), "") in junk) return true;   // slight -> slightly
-  if (replace(x,ctRegex!(`n?ing$`), "") in junk) return true;// begin -> beginning
-  if (replace(x,ctRegex!(`n?er$`), "") in junk) return true; // run -> runner
-  if (replace(x,ctRegex!(`ed$`), "") in junk) return true;   // deliver -> delivered
-  if (replace(x,ctRegex!(`d$`), "") in junk) return true;    // shared -> share
+  // if (replace(x,ctRegex!(`s$`), "") in junk) return true;    // right -> rights
+  // if (replace(x,ctRegex!(`ly$`), "") in junk) return true;   // slight -> slightly
+  // if (replace(x,ctRegex!(`n?ing$`), "") in junk) return true;// begin -> beginning
+  // if (replace(x,ctRegex!(`n?er$`), "") in junk) return true; // run -> runner
+  // if (replace(x,ctRegex!(`ed$`), "") in junk) return true;   // deliver -> delivered
+  // if (replace(x,ctRegex!(`d$`), "") in junk) return true;    // shared -> share
+  if (replace(x,ctRegex!(`(d|ed|n?er|n?ing|ly|s)$`), "") in junk) return true; // the above
   if (replace(x,ctRegex!(`e$`), "ing") in junk) return true; // share -> sharing
   if (replace(x,ctRegex!(`y$`), "ies") in junk) return true; // company -> companies
-  if (x~"ning" in junk) return true;
-  if (x~"ing" in junk) return true;
-  if (x~"d" in junk) return true;
+  if (x~"ning" in junk || x~"ing" in junk || x~"d" in junk || x~"er" in junk) return true;
   return false;
 }
 
