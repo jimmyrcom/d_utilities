@@ -35,7 +35,7 @@ int main(string[] args){
   State.buffer = new OutBuffer();
   State.buffer.reserve(8192);
   bool dbg;
-  string less_than, greater_than;
+  string less_than, greater_than, bucket;
   string[] filter, not_filter, s3, when;
 
   GetoptResult opts = getopt(args
@@ -47,6 +47,7 @@ int main(string[] args){
                              , "when|w", "Date regex", &when
                              , "less|l", "Filesize Filter in megabytes", &less_than
                              , "greater|g", "Filesize Filter in megabytes", &greater_than
+                             , "bucket|b", "Name of bucket", &bucket
                              );
 
   if (opts.helpWanted){
@@ -54,17 +55,24 @@ int main(string[] args){
         exit(0);
   }
 
-  string[] xs = [];
-  if (s3 is null) {
-    foreach (string line; lines(stdin)) xs~=line;
+  string[][] xs1 = [];
+  if (s3 is null && bucket !is null) {
+    foreach (string line; lines(stdin)) xs1 ~= split_and_prefix(bucket,line);
   }
   else {
+    if (s3 is null){
+      for (ulong j = args.length-1; j > 0 && startsWith(args[j].toLower(),"s3://"); j--)
+        s3 ~= args[j];
+    }
     foreach (x; s3){
-      xs = xs ~ execute(["aws", "s3", "ls","--recursive", x]).output.strip().split('\n');
+      auto match = matchFirst(x,ctRegex!("//([^/]+)/"));
+      string[] x1 = execute(["aws", "s3", "ls","--recursive", x]).output.strip().split('\n');
+      string[][] x2 = x1.map!(x => split_and_prefix(match[1], x)).array();
+      xs1 = xs1 ~ x2;
     }
   }
 
-  string[][] xs1 = xs.map!(x => split(x, ctRegex!(`[ \t]+`))).array();
+  //string[][] xs1 = xs.map!(x => split(x, ctRegex!(`[ \t]+`))).array();
 
   if (when !is null){
     foreach (string x; when){
@@ -82,7 +90,7 @@ int main(string[] args){
     xs1 = xs1.filter!(a => to!ulong(a[2]) < less_than1).array();
   }
 
-  xs = xs1.map!(last_column).array().sort!((a, b) => a < b).uniq().array();
+  string[] xs = xs1.map!(last_column).array().sort!((a, b) => a < b).uniq().array();
 
 
   if (filter !is null){
@@ -133,3 +141,8 @@ string last_column(string[] x){
   return "s3://"~x[x.length-1];
 }
 
+string[] split_and_prefix(string bucket, string x){
+  auto arr = split(x, ctRegex!(`[ \t]+`));
+  arr[3] = bucket ~'/'~ arr[3];
+  return arr;
+}
